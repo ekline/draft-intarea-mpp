@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd" [
+<!ENTITY RFC2234 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.2234.xml">
+<!ENTITY RFC2629 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.2629.xml">
+<!ENTITY RFC4234 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.4234.xml">
+<!ENTITY nbsp    "&#160;">
+]>
+<rfc>
+</rfc>
