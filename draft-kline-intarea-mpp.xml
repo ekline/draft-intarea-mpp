@@ -164,7 +164,16 @@ The Next Header field MUST NOT contain the value assigned to MPP itself
 
         <section title="Sender Processing"/>
 
-        <section title="Receiver Processing"/>
+        <section title="Receiver Processing">
+            <t>
+Long story short: split the MPP body into {MPP header, payload} units, and
+construct packets with:
+  (1) all headers preceding the header with NH=MPP,
+  (2) each packet's NH is changed to be that of the MPP header,
+  (3) append the specific payload (if present), and
+  (4) resubmit each modified packet to the IP datagram receive path.
+            </t>
+        </section>
     </section>
 
     <section title="Operational Considerations">
