@@ -1,0 +1,280 @@
+
+
+
+
+Internet Engineering Task Force                                 E. Kline
+Internet-Draft                                                      Loon
+Intended status: Experimental                               July 3, 2020
+Expires: January 4, 2021
+
+
+                         Multi-Payload Protocol
+                     draft-kline-intarea-mpp-latest
+
+Abstract
+
+   In certain situations it may be advantageous to encode several
+   protocol payloads into to a single IP datagram.  One such scenario is
+   a tunnel endpoint forwarding traffic from multiple clients into a
+   tunnel over a link with reduced performance relative to the link(s)
+   on which the clients reside (e.g., a leaf network connected via a
+   tunnel over satellite link to other networks).
+
+   This document describes the Multi-Payload Protocol: a Protocol Number
+   and a minimal header demarcating several payloads concatenated into a
+   single IP datagram.
+
+Requirements Language
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+   "OPTIONAL" in this document are to be interpreted as described in BCP
+   14 RFC2119 [1] RFC8174 [2] when, and only when, they appear in all
+   capitals, as shown here.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on January 4, 2021.
+
+
+
+
+
+Kline                    Expires January 4, 2021                [Page 1]
+
+Internet-Draft                     MPP                         July 2020
+
+
+Copyright Notice
+
+   Copyright (c) 2020 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents
+   (https://trustee.ietf.org/license-info) in effect on the date of
+   publication of this document.  Please review these documents
+   carefully, as they describe your rights and restrictions with respect
+   to this document.  Code Components extracted from this document must
+   include Simplified BSD License text as described in Section 4.e of
+   the Trust Legal Provisions and are provided without warranty as
+   described in the Simplified BSD License.
+
+Table of Contents
+
+   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
+   2.  Protocol  . . . . . . . . . . . . . . . . . . . . . . . . . .   3
+     2.1.  Overview  . . . . . . . . . . . . . . . . . . . . . . . .   3
+     2.2.  Header Format . . . . . . . . . . . . . . . . . . . . . .   3
+     2.3.  Sender Processing . . . . . . . . . . . . . . . . . . . .   4
+     2.4.  Receiver Processing . . . . . . . . . . . . . . . . . . .   4
+   3.  Operational Considerations  . . . . . . . . . . . . . . . . .   4
+     3.1.  Fragmentation . . . . . . . . . . . . . . . . . . . . . .   4
+     3.2.  Combined Lengths Bounds Checking  . . . . . . . . . . . .   4
+     3.3.  Firewall/filtering Considerations . . . . . . . . . . . .   4
+   4.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   4
+   5.  Security Considerations . . . . . . . . . . . . . . . . . . .   4
+   6.  Normative References  . . . . . . . . . . . . . . . . . . . .   4
+   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .   5
+
+1.  Introduction
+
+   In certain situations it may be advantageous to encode several
+   protocol payloads into to a single IP datagram.  One such scenario is
+   a tunnel endpoint forwarding traffic from multiple clients into a
+   tunnel over a link with reduced performance relative to the link(s)
+   on which the clients reside (e.g., a leaf network connected via a
+   tunnel over satellite link to other networks).
+
+   This document describes the Multi-Payload Protocol: a Protocol Number
+   and a minimal header demarcating several payloads concatenated into a
+   single IP datagram.
+
+
+
+
+
+
+
+Kline                    Expires January 4, 2021                [Page 2]
+
+Internet-Draft                     MPP                         July 2020
+
+
+2.  Protocol
+
+2.1.  Overview
+
+   The Multi-Payload Protocol (MPP) payload consists of repeating pairs
+   of MPP header followed by a payload of the type indicated in the MPP
+   header.  If the given type is IPv6-NoNxt (59), then no payload
+   follows the header, though another MPP header (and possible payload)
+   may follow it if the IP header length indicates there are more
+   datagram octets remaining.
+
+2.2.  Header Format
+
+
+       0                   1                   2                   3
+       0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      | Length                    |Pad| Reserved      | Next Header   |
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+
+   Length and Pad (2 octets, network byte order, unsigned)
+
+   The Length portion of this unsigned 16 bit integer is the length of
+   all octets after this header in units of 4 octets.  The pad portion,
+   treated as an unsigned 2 bit integer, in the number of the bytes at
+   the end of the payload that are padding bytes.  Implementations MUST
+   pad payloads to a multiple of 4 octets.  Pad octets SHOULD be zero
+   and MUST be ignored by the receiver; they MUST NOT be accessible by
+   the processing element associated with the protocol indicated by Next
+   Header.
+
+   The number of octets following this header and preceding any
+   subsequent MPP headers is: length_and_pad & ~0x0003.
+
+   The number of pad octets is: length_and_pad & 0x0003.
+
+   The length of the payload of type Next Header is the difference
+   between these two numbers.
+
+   Reserved (1 octet)
+
+   Reserved for future use.  SHOULD be set to zero by the sender.  Non-
+   zero values MUST be interpreted by the receiver as an indication that
+   a newer version of this header is in use, and this payload MUST be
+   skipped (i.e. as a packet with this Next Header and payload were
+   dropped).
+
+
+
+
+Kline                    Expires January 4, 2021                [Page 3]
+
+Internet-Draft                     MPP                         July 2020
+
+
+   Next Header (1 octet)
+
+   Identifies the type of header immediately following this header.
+   Uses the same values as the IPv4 Protocol and IPv6 Next Header fields
+   IANA-PN [3].
+
+   The Next Header field MUST NOT contain the value assigned to MPP
+   itself (recursive inclusion of Multi-Payload Protocol contents is
+   prohibited).
+
+2.3.  Sender Processing
+
+2.4.  Receiver Processing
+
+3.  Operational Considerations
+
+3.1.  Fragmentation
+
+3.2.  Combined Lengths Bounds Checking
+
+3.3.  Firewall/filtering Considerations
+
+4.  IANA Considerations
+
+   This document requests that a new Internet Protocol Number be
+   assigned to indicate that the payload consists of one or more pairs
+   of MPP header and associated payload.
+
+   IANA has allocated the value TBD for this purpose.
+
+5.  Security Considerations
+
+   See Operational Considerations...
+
+6.  Normative References
+
+   [1]        Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/info/rfc2119>.
+
+   [2]        Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
+              May 2017, <https://www.rfc-editor.org/info/rfc8174>.
+
+   [3]        IANA, "Protocol Numbers",
+              <https://www.iana.org/assignments/protocol-numbers>.
+
+
+
+
+Kline                    Expires January 4, 2021                [Page 4]
+
+Internet-Draft                     MPP                         July 2020
+
+
+Author's Address
+
+   Erik Kline
+   Loon, LLC
+   1600 Amphitheatre Parkway
+   Mountain View, CA  94043
+   US
+
+   Email: ek@loon.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Kline                    Expires January 4, 2021                [Page 5]
