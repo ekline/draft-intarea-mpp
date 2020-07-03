@@ -516,6 +516,7 @@
 <a href="#rfc.section.2.3">2.3.</a> Sender Processing</h1>
 <h1 id="rfc.section.2.4">
 <a href="#rfc.section.2.4">2.4.</a> Receiver Processing</h1>
+<p id="rfc.section.2.4.p.1">Long story short: split the MPP body into {MPP header, payload} units, and construct packets with: (1) all headers preceding the header with NH=MPP, (2) each packet's NH is changed to be that of the MPP header, (3) append the specific payload (if present), and (4) resubmit each modified packet to the IP datagram receive path.  </p>
 <h1 id="rfc.section.3">
 <a href="#rfc.section.3">3.</a> Operational Considerations</h1>
 <h1 id="rfc.section.3.1">
