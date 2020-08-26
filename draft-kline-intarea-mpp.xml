@@ -1,225 +1,262 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
+<?xml version="1.0" encoding="US-ASCII"?>
 <!DOCTYPE rfc SYSTEM "rfc2629.dtd" [
-
 <!ENTITY RFC2119 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml">
 <!ENTITY RFC2234 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.2234.xml">
 <!ENTITY RFC2629 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.2629.xml">
 <!ENTITY RFC4234 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.4234.xml">
 <!ENTITY RFC8174 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.8174.xml">
-
-<!ENTITY nbsp    "&#160;">
-
+<!ENTITY nbsp "&#160;">
 ]>
-
 <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
+<rfc category="exp" docName="draft-kline-intarea-mpp-latest" ipr="trust200902">
+  <?rfc strict="yes"?>
 
-<rfc category="exp"
-     ipr="trust200902"
-     docName="draft-kline-intarea-mpp-latest">
+  <?rfc toc="yes"?>
 
-    <?rfc strict="yes"?>
-    <?rfc toc="yes"?>
-    <?rfc tocompact="yes"?>
-    <?rfc tocdepth="3"?>
-    <?rfc symrefs="no"?>
-    <?rfc sortrefs="yes"?>
-    <?rfc compact="yes"?>
-    <?rfc subcompact="no"?>
+  <?rfc tocompact="yes"?>
 
-<front>
+  <?rfc tocdepth="3"?>
+
+  <?rfc symrefs="no"?>
+
+  <?rfc sortrefs="yes"?>
+
+  <?rfc compact="yes"?>
+
+  <?rfc subcompact="no"?>
+
+  <front>
     <title abbrev="MPP">Multi-Payload Protocol</title>
 
-    <author
-        fullname="Erik Kline"
-        initials="E."
-        surname="Kline">
-        <organization abbrev="Loon">Loon, LLC</organization>
-        <address>
-            <postal>
-                <street>1600 Amphitheatre Parkway</street>
-                <city>Mountain View</city>
-                <region>CA</region>
-                <code>94043</code>
-                <country>US</country>
-            </postal>
-            <email>ek@loon.com</email>
-        </address>
+    <author fullname="Erik Kline" initials="E." surname="Kline">
+      <organization abbrev="Loon">Loon, LLC</organization>
+
+      <address>
+        <postal>
+          <street>1600 Amphitheatre Parkway</street>
+
+          <city>Mountain View</city>
+
+          <region>CA</region>
+
+          <code>94043</code>
+
+          <country>US</country>
+        </postal>
+
+        <email>ek@loon.com</email>
+      </address>
     </author>
 
     <date/>
 
     <area>Internet</area>
+
     <workgroup>Internet Engineering Task Force</workgroup>
 
     <abstract>
-        <t>
-In certain situations it may be advantageous to encode several protocol
-payloads into to a single IP datagram.  One such scenario is a tunnel endpoint
-forwarding traffic from multiple clients into a tunnel over a link with
-reduced performance relative to the link(s) on which the clients reside
-(e.g., a leaf network connected via a tunnel over satellite link to other
-networks).
-        </t>
-        <t>
-This document describes the Multi-Payload Protocol: a Protocol Number and a
-minimal header demarcating several payloads concatenated into a single
-IP datagram.
-        </t>
+      <t>In certain situations it may be advantageous to encode several
+      protocol payloads into to a single IP datagram. One such scenario is a
+      tunnel endpoint forwarding traffic from multiple clients over a link
+      with reduced performance relative to the link(s) on which the clients
+      reside (e.g., a leaf network connected via a tunnel over satellite link
+      to other networks).</t>
+
+      <t>This document describes the Multi-Payload Protocol: a Protocol Number
+      and a minimal header demarcating several payloads concatenated into a
+      single IP datagram.</t>
     </abstract>
 
     <note title="Requirements Language">
-        <t>
-The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL
-NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED",
-"MAY", and "OPTIONAL" in this document are to be interpreted as
-described in BCP 14 <xref target="RFC2119">RFC2119</xref>
-<xref target="RFC8174">RFC8174</xref> when, and only when, they appear in all
-capitals, as shown here.
-        </t>
+      <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+      "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+      "OPTIONAL" in this document are to be interpreted as described in BCP 14
+      <xref target="RFC2119">RFC2119</xref> <xref
+      target="RFC8174">RFC8174</xref> when, and only when, they appear in all
+      capitals, as shown here.</t>
     </note>
+  </front>
 
-</front>
-
-<middle>
+  <middle>
     <section title="Introduction">
-        <t>
-In certain situations it may be advantageous to encode several protocol
-payloads into to a single IP datagram.  One such scenario is a tunnel endpoint
-forwarding traffic from multiple clients into a tunnel over a link with
-reduced performance relative to the link(s) on which the clients reside
-(e.g., a leaf network connected via a tunnel over satellite link to other
-networks).
-        </t>
-        <t>
-This document describes the Multi-Payload Protocol: a Protocol Number and a
-minimal header demarcating several payloads concatenated into a single
-IP datagram.
-        </t>
-    </section>
-    <section title="Protocol">
-        <section title="Overview">
-            <t>
-The Multi-Payload Protocol (MPP) payload consists of repeating pairs of MPP
-header followed by a payload of the type indicated in the MPP header.  If the
-given type is IPv6-NoNxt (59), then no payload follows the header, though
-another MPP header (and possible payload) may follow it if the IP header
-length indicates there are more datagram octets remaining.
-            </t>
-        </section>
+      <t>In certain situations it may be advantageous to encode several
+      protocol payloads into to a single IP datagram. One such scenario is a
+      tunnel endpoint forwarding traffic from multiple clients over a link
+      with reduced performance relative to the link(s) on which the clients
+      reside (e.g., a leaf network connected via a tunnel over satellite link
+      to other networks).</t>
 
-        <section title="Header Format">
-            <t>
-<figure>
-<artwork>
-<![CDATA[
+      <t>This document describes the Multi-Payload Protocol: a Protocol Number
+      and a minimal header demarcating several payloads concatenated into a
+      single IP datagram.</t>
+    </section>
+
+    <section title="Protocol">
+      <section title="Overview">
+        <t>The Multi-Payload Protocol (MPP) payload consists of one or more
+        MPP header(s) followed by a payload of the type indicated in the MPP
+        header. If the given type is IPv6-NoNxt (59), then no payload follows
+        the header, though another MPP header (and possible payload) may
+        follow it if the IP header length indicates there are more datagram
+        octets remaining.</t>
+      </section>
+
+      <section title="Header Format">
+        <t><figure>
+            <artwork><![CDATA[
+
     0                   1                   2                   3
     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    | Length                    |Pad| Reserved      | Next Header   |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-]]>
-</artwork>
-</figure>
-            </t>
-            <t>Length and Pad (2 octets, network byte order, unsigned)</t>
-            <t>
-The Length portion of this unsigned 16 bit integer is the length of all octets
-after this header in units of 4 octets.  The pad portion, treated as an
-unsigned 2 bit integer, in the number of the bytes at the end of the payload
-that are padding bytes.  Implementations MUST pad payloads to a multiple of
-4 octets.  Pad octets SHOULD be zero and MUST be ignored by the receiver;
-they MUST NOT be accessible by the processing element associated with the
-protocol indicated by Next Header.
-            </t>
-            <t>
-The number of octets following this header and preceding any subsequent MPP
-headers is: length_and_pad &amp; ~0x0003.
-            </t>
-            <t>
-The number of pad octets is: length_and_pad &amp; 0x0003.
-            </t>
-            <t>
-The length of the payload of type Next Header is the difference between these
-two numbers.
-            </t>
-            <t>Reserved (1 octet)</t>
-            <t>
-Reserved for future use.  SHOULD be set to zero by the sender.  Non-zero values
-MUST be interpreted by the receiver as an indication that a newer version of
-this header is in use, and this payload MUST be skipped (i.e. as a packet with
-this Next Header and payload were dropped).
-            </t>
-            <t>Next Header (1 octet)</t>
-            <t>
-Identifies the type of header immediately following this header.  Uses the
-same values as the IPv4 Protocol and IPv6 Next Header fields
-<xref target="IANA-PN">IANA-PN</xref>.
-            </t>
-            <t>
-The Next Header field MUST NOT contain the value assigned to MPP itself
-(recursive inclusion of Multi-Payload Protocol contents is prohibited).
-            </t>
-        </section>
 
-        <section title="Sender Processing"/>
+]]></artwork>
+          </figure></t>
 
-        <section title="Receiver Processing">
-            <t>
-Long story short: split the MPP body into {MPP header, payload} units, and
-construct packets with:
-  (1) all headers preceding the header with NH=MPP,
-  (2) each packet's NH is changed to be that of the MPP header,
-  (3) append the specific payload (if present), and
-  (4) resubmit each modified packet to the IP datagram receive path.
-            </t>
-        </section>
+        <t><list style="hanging">
+            <t hangText="Length">(14 bits, network byte order, unsigned) The
+            length of all octets after this header in units of 4 octets [TODO:
+            The length of *all* octets? It also seems like we should be able
+            to make a more efficient packing, with multiple "pointers" in one
+            header. (HL, Pointer1, Pointer2, 00) ]</t>
+
+            <t hangText="Pad">(2 bits) The pad portion, treated as an unsigned
+            2 bit integer, in the number of the bytes at the end of the
+            payload that are padding bytes. Implementations MUST pad payloads
+            to a multiple of 4 octets. Pad octets SHOULD be zero and MUST be
+            ignored by the receiver; they MUST NOT be accessible by the
+            processing element associated with the protocol indicated by Next
+            Header.</t>
+
+            <t hangText="Reserved">(1 octet) Reserved for future use. SHOULD
+            be set to zero by the sender. Non-zero values MUST be interpreted
+            by the receiver as an indication that a newer version of this
+            header is in use, and this payload MUST be skipped (i.e. as a
+            packet with this Next Header and payload were dropped).</t>
+
+            <t hangText="Next Header">(1 octet) Identifies the type of header
+            immediately following this header. Uses the same values as the
+            IPv4 Protocol and IPv6 Next Header fields <xref
+            target="IANA-PN">IANA-PN</xref>. The Next Header field MUST NOT
+            contain the value assigned to MPP itself (recursive inclusion of
+            Multi-Payload Protocol contents is prohibited).</t>
+          </list></t>
+
+        <t>-----------</t>
+
+        <t>Length and Pad (2 octets, network byte order, unsigned)</t>
+
+        <t>The Length portion of this unsigned 16 bit integer is the length of
+        all octets after this header in units of 4 octets. The pad portion,
+        treated as an unsigned 2 bit integer, in the number of the bytes at
+        the end of the payload that are padding bytes. Implementations MUST
+        pad payloads to a multiple of 4 octets. Pad octets SHOULD be zero and
+        MUST be ignored by the receiver; they MUST NOT be accessible by the
+        processing element associated with the protocol indicated by Next
+        Header.</t>
+
+        <t>The number of octets following this header and preceding any
+        subsequent MPP headers is: length_and_pad &amp; ~0x0003.</t>
+
+        <t>The number of pad octets is: length_and_pad &amp; 0x0003.</t>
+
+        <t>The length of the payload of type Next Header is the difference
+        between these two numbers.</t>
+
+        <t>Reserved (1 octet)</t>
+
+        <t>Reserved for future use. SHOULD be set to zero by the sender.
+        Non-zero values MUST be interpreted by the receiver as an indication
+        that a newer version of this header is in use, and this payload MUST
+        be skipped (i.e. as a packet with this Next Header and payload were
+        dropped).</t>
+
+        <t>Next Header (1 octet)</t>
+
+        <t>Identifies the type of header immediately following this header.
+        Uses the same values as the IPv4 Protocol and IPv6 Next Header fields
+        <xref target="IANA-PN">IANA-PN</xref>.</t>
+
+        <t>The Next Header field MUST NOT contain the value assigned to MPP
+        itself (recursive inclusion of Multi-Payload Protocol contents is
+        prohibited).</t>
+      </section>
+
+      <section title="Sender Processing">
+        <t>Need to cover:</t>
+
+        <t><list style="symbols">
+            <t>Negotiation of capability, and size</t>
+
+            <t>How long to buffer</t>
+
+            <t>How to prioritize (better to wait for 4 small packets or cram 2
+            large ones together?)</t>
+
+            <t>What do you do with e.g URG pointer?</t>
+
+            <t>MTU discovery?</t>
+
+            <t>DF bit?</t>
+
+            <t/>
+          </list></t>
+      </section>
+
+      <section title="Receiver Processing">
+        <t>Long story short: split the MPP body into {MPP header, payload}
+        units, and construct packets with: (1) all headers preceding the
+        header with NH=MPP, (2) each packet's NH is changed to be that of the
+        MPP header, (3) append the specific payload (if present), and (4)
+        resubmit each modified packet to the IP datagram receive path.</t>
+      </section>
     </section>
 
     <section title="Operational Considerations">
-        <section title="Fragmentation"/>
+      <section title="Fragmentation"/>
 
-        <section title="Combined Lengths Bounds Checking"/>
+      <section title="Combined Lengths Bounds Checking"/>
 
-        <section title="Firewall/filtering Considerations"/>
+      <section title="Firewall/filtering Considerations"/>
     </section>
 
     <section title="IANA Considerations">
-        <t>
-This document requests that a new Internet Protocol Number be assigned to
-indicate that the payload consists of one or more pairs of MPP header and
-associated payload.
-        </t>
-        <t>
-IANA has allocated the value TBD for this purpose.
-        </t>
+      <t>This document requests that a new Internet Protocol Number be
+      assigned to indicate that the payload consists of one or more pairs of
+      MPP header and associated payload.</t>
+
+      <t>IANA has allocated the value TBD for this purpose.</t>
     </section>
 
     <section title="Security Considerations">
-        <t>
-See Operational Considerations...
-        </t>
+      <t>See Operational Considerations...</t>
     </section>
-</middle>
+  </middle>
 
-<back>
+  <back>
     <references title="Normative References">
-        <?rfc include='reference.RFC.2119'?>
-        <?rfc include='reference.RFC.8174'?>
-        <reference anchor="IANA-PN"
-                   target="https://www.iana.org/assignments/protocol-numbers">
-            <front>
-                <title>Protocol Numbers</title>
-                <author><organization>IANA</organization></author>
-                <date/>
-            </front>
-        </reference>
+      <?rfc include='reference.RFC.2119'?>
+
+      <?rfc include='reference.RFC.8174'?>
+
+      <reference anchor="IANA-PN"
+                 target="https://www.iana.org/assignments/protocol-numbers">
+        <front>
+          <title>Protocol Numbers</title>
+
+          <author>
+            <organization>IANA</organization>
+          </author>
+
+          <date/>
+        </front>
+      </reference>
     </references>
 
-<!--
+    <!--
     <references title="Informational References">
     </references>
 -->
-</back>
-
+  </back>
 </rfc>
